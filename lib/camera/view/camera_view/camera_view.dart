@@ -23,7 +23,8 @@ class CameraView extends GetView<AppCameraController> {
           ),
           _cameraFilter(context),
           _cameraExtension(
-            flashStatus: true,
+            flashMode: controller.onTapOpenFlash,
+            flashStatus: controller.cameraStatus.value,
             takePhoto: controller.takeAPicture,
             context: context,
           )
@@ -35,6 +36,7 @@ class CameraView extends GetView<AppCameraController> {
   Widget _cameraExtension({
     required bool flashStatus,
     required Function takePhoto,
+    required Function flashMode,
     required BuildContext context,
   }) {
     return Container(
@@ -59,6 +61,9 @@ class CameraView extends GetView<AppCameraController> {
                       ),
                     ),
                     GestureDetector(
+                      onTap: () {
+                        flashMode();
+                      },
                       child: Icon(
                         flashStatus ? Icons.flash_on : Icons.flash_off,
                         size: 30,

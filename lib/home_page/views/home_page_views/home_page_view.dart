@@ -25,7 +25,7 @@ class HomePageView extends GetView<HomePageController> {
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       const Text(
-                        'Class A',
+                        'Area A',
                         style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -69,7 +69,7 @@ class HomePageView extends GetView<HomePageController> {
                         height: 20,
                       ),
                       const Text(
-                        'Class B',
+                        'Area B',
                         style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -113,7 +113,7 @@ class HomePageView extends GetView<HomePageController> {
                         height: 20,
                       ),
                       const Text(
-                        'Class C',
+                        'Area C',
                         style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,

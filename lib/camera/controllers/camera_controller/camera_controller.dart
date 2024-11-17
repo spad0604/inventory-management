@@ -9,6 +9,7 @@ class AppCameraController extends SuperController {
   late List<CameraDescription> cameras;
   Rxn<XFile> image = Rxn<XFile>();
   RxBool isCameraInitialized = false.obs;
+  Rx<bool> cameraStatus = false.obs;
 
   @override
   void onInit() {
@@ -81,6 +82,15 @@ class AppCameraController extends SuperController {
   void onClose() {
     cameraController.dispose();
     super.onClose();
+  }
+
+  void onTapOpenFlash() async {
+    cameraStatus.value = !cameraStatus.value;
+    if(cameraStatus.value == true) {
+      await cameraController.setFlashMode(FlashMode.torch);
+    } else {
+      await cameraController.setFlashMode(FlashMode.off);
+    }
   }
 
   @override

@@ -10,9 +10,9 @@ import '../../../model/expiry_enum.dart';
 class HomePageController extends SuperController {
   final FirebaseService firebaseService = FirebaseService();
 
-  List<int> tickClassA = List.filled(6, 0);
-  List<int> tickClassB = List.filled(6, 0);
-  List<int> tickClassC = List.filled(6, 0);
+  List<int> tickClassA = List.filled(11, 0);
+  List<int> tickClassB = List.filled(11, 0);
+  List<int> tickClassC = List.filled(11, 0);
 
   Rxn<int> orderValue = Rxn<int>();
   Rxn<String> areaValue = Rxn<String>();
@@ -28,9 +28,9 @@ class HomePageController extends SuperController {
   }
 
   Future<void> loadData() async {
-    tickClassA.fillRange(0, 6, 0);
-    tickClassB.fillRange(0, 6, 0);
-    tickClassC.fillRange(0, 6, 0);
+    tickClassA.fillRange(0, 11, 0);
+    tickClassB.fillRange(0, 11, 0);
+    tickClassC.fillRange(0, 11, 0);
 
     firebaseService.getAllItemsStream().listen((items) {
       listItemClassA.clear();
@@ -58,7 +58,7 @@ class HomePageController extends SuperController {
       tickClassA[itemModel.order]++;
     }
 
-    for (int i = 1; i <= 5; i++) {
+    for (int i = 1; i <= 10; i++) {
       if (tickClassA[i] == 0) {
         ItemModel itemModel = ItemModel('A', '', '', Expiry.valid, i);
         listItemClassA.add(itemModel);
@@ -73,7 +73,7 @@ class HomePageController extends SuperController {
       tickClassB[itemModel.order]++;
     }
 
-    for (int i = 1; i <= 5; i++) {
+    for (int i = 1; i <= 10; i++) {
       if (tickClassB[i] == 0) {
         ItemModel itemModel = ItemModel('B', '', '', Expiry.valid, i);
         listItemClassB.add(itemModel);
@@ -111,7 +111,7 @@ class HomePageController extends SuperController {
       tickClassC[itemModel.order]++;
     }
 
-    for (int i = 1; i <= 5; i++) {
+    for (int i = 1; i <= 10; i++) {
       if (tickClassC[i] == 0) {
         ItemModel itemModel = ItemModel('C', '', '', Expiry.valid, i);
         listItemClassC.add(itemModel);
@@ -129,26 +129,21 @@ class HomePageController extends SuperController {
 
   @override
   void onDetached() {
-    // TODO: implement onDetached
   }
 
   @override
   void onHidden() {
-    // TODO: implement onHidden
   }
 
   @override
   void onInactive() {
-    // TODO: implement onInactive
   }
 
   @override
   void onPaused() {
-    // TODO: implement onPaused
   }
 
   @override
   void onResumed() {
-    // TODO: implement onResumed
   }
 }
