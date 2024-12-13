@@ -17,11 +17,13 @@ class ImagePreviewController extends SuperController {
 
   final textRecognizer = TextRecognizer();
 
-
   TextEditingController expiryController = TextEditingController();
   TextEditingController productNameController = TextEditingController();
   TextEditingController areaController = TextEditingController();
   TextEditingController orderController = TextEditingController();
+
+  Rx<bool> readOnly = true.obs;
+
   Rxn<String> recognizedText = Rxn<String>();
   Rxn<XFile> image = Rxn<XFile>();
 
@@ -30,6 +32,7 @@ class ImagePreviewController extends SuperController {
     super.onInit();
     areaController.text = homePageController.areaValue.value!;
     orderController.text = homePageController.orderValue.value.toString();
+
     image.value = null;
     expiryController.clear();
     recognizedText.value = null;
@@ -43,7 +46,8 @@ class ImagePreviewController extends SuperController {
         final inputImage = InputImage.fromFilePath(image.value!.path);
         final recognizedTextResult = await textRecognizer.processImage(inputImage);
 
-        debugPrint(recognizedTextResult.text);
+        debugPrint('olla ${recognizedTextResult.text}');
+
         recognizedText.value = expiryFormat(recognizedTextResult.text);
         expiryController.text = recognizedText.value ?? '';
       } else {
@@ -61,13 +65,58 @@ class ImagePreviewController extends SuperController {
   }
 
   String expiryFormat(String text) {
-    final regex = RegExp(r'HSD: (\d{2}/\d{2}/\d{4})');
-    final match = regex.firstMatch(text);
+    final regex = RegExp(r'(\d{2}[./\s]\d{2}[./\s]\d{2,4})');
 
-    if (match != null) {
-      return match.group(1) ?? "Không tìm thấy hạn sử dụng";
+    final matches = regex.allMatches(text);
+
+    if (matches.isNotEmpty) {
+      DateTime? latestDate;
+      String? latestDateString;
+
+      for (final match in matches) {
+        String rawDate = normalizeDate(match.group(0)!);
+
+        DateTime currentDate = parseDate(rawDate);
+
+        if (latestDate == null || currentDate.isAfter(latestDate)) {
+          latestDate = currentDate;
+          latestDateString = rawDate;
+        }
+      }
+
+      return latestDateString ?? "Không tìm thấy hạn sử dụng";
     } else {
       return "Không tìm thấy hạn sử dụng";
+    }
+  }
+
+  String normalizeDate(String date) {
+    date = date.replaceAll(RegExp(r'[.\s]'), '/');
+
+    final parts = date.split('/');
+    if (parts.length == 3) {
+      String day = parts[0];
+      String month = parts[1];
+      String year = parts[2];
+
+      if (year.length == 2) {
+        year = '20$year';
+      }
+      return "$day/$month/$year";
+    }
+    return date;
+  }
+
+  DateTime parseDate(String date) {
+    final parts = date.split('/');
+    if (parts.length == 3) {
+      final day = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final year = int.parse(parts[2]);
+
+      return DateTime(year, month, day);
+    } else {
+      return DateTime.now();
     }
   }
 
@@ -75,6 +124,10 @@ class ImagePreviewController extends SuperController {
     DateTime expiryDate = firebaseService.parseExpiryDate(expiryController.text);
 
     Expiry status = firebaseService.getExpirationStatus(expiryDate);
+
+    if (productNameController.text.isEmpty) {
+      productNameController.text = 'null';
+    }
 
     final ItemModel itemModel = ItemModel(areaController.text, productNameController.text, expiryController.text, status, int.parse(orderController.text));
     firebaseService.addItem(itemModel);

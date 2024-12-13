@@ -18,7 +18,7 @@ class HomePageView extends GetView<HomePageController> {
               const AppBarWidget(pageName: 'Home Page'),
               Container(
                 color: const Color(0xFFF8F6F7),
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(15),
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,7 +187,7 @@ class ShoppingItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (name == '') {
+    if (expiry == '') {
       return Container(
         height: 180,
         width: 120,
@@ -282,7 +282,7 @@ class ShoppingItem extends StatelessWidget {
             ),
             Text(
               overflow: TextOverflow.ellipsis,
-              name,
+              name == 'null' ? '' : name,
               style: const TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.w600,

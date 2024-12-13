@@ -11,16 +11,24 @@ class AppCameraController extends SuperController {
   RxBool isCameraInitialized = false.obs;
   Rx<bool> cameraStatus = false.obs;
 
+  Rx<int> cameraStatusValue = 0.obs;
+
   @override
   void onInit() {
     super.onInit();
     initializeCamera();
   }
 
+  @override
+  void dispose() {
+    cameraController.dispose();
+    super.dispose();
+  }
+
   Future<void> initializeCamera() async {
     try {
       cameras = await availableCameras();
-      cameraController = CameraController(cameras[0], ResolutionPreset.medium);
+      cameraController = CameraController(cameras[0], ResolutionPreset.high);
       await cameraController.initialize();
       isCameraInitialized.value = true;
     } catch (e) {
@@ -28,8 +36,9 @@ class AppCameraController extends SuperController {
     }
   }
 
+
   Future<void> takeAPicture() async {
-    if (!isCameraInitialized.value) {
+    if (isCameraInitialized.value == false) {
       return;
     }
     try {
@@ -62,6 +71,7 @@ class AppCameraController extends SuperController {
         N.toImagePreview();
       }
     } catch (e) {
+
     }
   }
 

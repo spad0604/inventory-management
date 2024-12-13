@@ -22,11 +22,13 @@ class CameraView extends GetView<AppCameraController> {
                 : const Center(child: CircularProgressIndicator()),
           ),
           _cameraFilter(context),
-          _cameraExtension(
-            flashMode: controller.onTapOpenFlash,
-            flashStatus: controller.cameraStatus.value,
-            takePhoto: controller.takeAPicture,
-            context: context,
+          Obx(
+    () => _cameraExtension(
+              flashMode: controller.onTapOpenFlash,
+              flashStatus: controller.cameraStatus.value,
+              takePhoto: controller.takeAPicture,
+              context: context,
+            ),
           )
         ],
       ),

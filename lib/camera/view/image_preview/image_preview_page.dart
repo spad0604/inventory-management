@@ -38,14 +38,32 @@ class ImagePreviewPage extends GetView<ImagePreviewController> {
                       }
                     }),
                     const SizedBox(height: 40,),
-                    CustomLargeTextField(
-                        readOnly: true,
-                        textFieldName: 'HSD',
-                        hintText: 'Halo',
-                        isConstrain: true,
-                        textEditingController: controller.expiryController),
-                    const SizedBox(
-                      height: 20,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Expanded(
+                          child: Obx(
+                            () => CustomLargeTextField(
+                                readOnly: controller.readOnly.value,
+                                textFieldName: 'HSD',
+                                hintText: 'HSD',
+                                isConstrain: true,
+                                textEditingController: controller.expiryController
+                                )
+                          ),
+                        ),
+                        const SizedBox(width: 10,),
+                        GestureDetector(
+                          onTap: () {
+                            controller.readOnly.value = !controller.readOnly.value;
+                          },
+                          child: const Icon(
+                            Icons.edit,
+                            color: Colors.black,
+                            size: 30,
+                          ),
+                        )
+                      ],
                     ),
                     const SizedBox(
                       height: 20,
@@ -74,6 +92,32 @@ class ImagePreviewPage extends GetView<ImagePreviewController> {
                         hintText: 'Enter Product Name',
                         isConstrain: true,
                         textEditingController: controller.productNameController
+                    ),
+                    const SizedBox(height: 20,),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          // Handle tap event
+                        },
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.black,
+                              width: 1,
+                            ),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.image,
+                              size: 50,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 20,),
                     Row(
