@@ -25,153 +25,159 @@ class ImagePreviewPage extends GetView<ImagePreviewController> {
                 height: Get.height,
                 color: const Color(0xFFF8F6F7),
                 padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Obx(() {
-                      if (controller.image.value != null) {
-                        return SizedBox(
-                          child: Image.file(File(controller.image.value!.path)),
-                        );
-                      } else {
-                        return const Text("No image captured");
-                      }
-                    }),
-                    const SizedBox(height: 40,),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Expanded(
-                          child: Obx(
-                            () => CustomLargeTextField(
-                                readOnly: controller.readOnly.value,
-                                textFieldName: 'HSD',
-                                hintText: 'HSD',
-                                isConstrain: true,
-                                textEditingController: controller.expiryController
-                                )
-                          ),
-                        ),
-                        const SizedBox(width: 10,),
-                        GestureDetector(
-                          onTap: () {
-                            controller.readOnly.value = !controller.readOnly.value;
-                          },
-                          child: const Icon(
-                            Icons.edit,
-                            color: Colors.black,
-                            size: 30,
-                          ),
-                        )
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    CustomLargeTextField(
-                        readOnly: true,
-                        textFieldName: 'Area Name',
-                        hintText: 'Area Name',
-                        isConstrain: true,
-                        textEditingController: controller.areaController
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    CustomLargeTextField(
-                        readOnly: true,
-                        textFieldName: 'Order',
-                        hintText: 'Order',
-                        isConstrain: true,
-                        textEditingController: controller.orderController
-                    ),
-                    const SizedBox(height: 20,),
-                    CustomLargeTextField(
-                        readOnly: false,
-                        textFieldName: 'Product Name',
-                        hintText: 'Enter Product Name',
-                        isConstrain: true,
-                        textEditingController: controller.productNameController
-                    ),
-                    const SizedBox(height: 20,),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          // Handle tap event
-                        },
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.black,
-                              width: 1,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Obx(() {
+                        if (controller.image.value != null) {
+                          return SizedBox(
+                            child: Image.file(File(controller.image.value!.path)),
+                          );
+                        } else {
+                          return const Text("No image captured");
+                        }
+                      }),
+                      const SizedBox(height: 40,),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Expanded(
+                            child: Obx(
+                              () => CustomLargeTextField(
+                                  readOnly: controller.readOnly.value,
+                                  textFieldName: 'HSD',
+                                  hintText: 'HSD',
+                                  isConstrain: true,
+                                  textEditingController: controller.expiryController
+                                  )
                             ),
                           ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.image,
-                              size: 50,
-                              color: Colors.black54,
+                          const SizedBox(width: 10,),
+                          GestureDetector(
+                            onTap: () {
+                              controller.readOnly.value = !controller.readOnly.value;
+                            },
+                            child: const Icon(
+                              Icons.edit,
+                              color: Colors.black,
+                              size: 30,
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      CustomLargeTextField(
+                          readOnly: true,
+                          textFieldName: 'Area Name',
+                          hintText: 'Area Name',
+                          isConstrain: true,
+                          textEditingController: controller.areaController
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      CustomLargeTextField(
+                          readOnly: true,
+                          textFieldName: 'Order',
+                          hintText: 'Order',
+                          isConstrain: true,
+                          textEditingController: controller.orderController
+                      ),
+                      const SizedBox(height: 20,),
+                      CustomLargeTextField(
+                          readOnly: false,
+                          textFieldName: 'Product Name',
+                          hintText: 'Enter Product Name',
+                          isConstrain: true,
+                          textEditingController: controller.productNameController
+                      ),
+                      const SizedBox(height: 20,),
+                      Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            controller.toCaptureItem();
+                          },
+                          child: Container(
+                            width: 200,
+                            height: 200,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.black,
+                                width: 1,
+                              ),
+                            ),
+                            child: Obx(
+                              () => Center(
+                                child: controller.captureImage.value == null ? (
+                                  const Icon(
+                                    Icons.image,
+                                    size: 50,
+                                    color: Colors.black54,
+                                  )
+                                ) : Image.file(File(controller.captureImage.value!.path))
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 20,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            controller.saveToDatabase();
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
-                              color: Colors.lightBlue
-                            ),
-                            width: 150,
-                            height: 50,
-                            child: const  Center(
-                              child: Text(
-                                'Save',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            controller.backToHomePage();
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
+                      const SizedBox(height: 20,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              controller.saveToDatabase();
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(24),
-                                color: Colors.grey
-                            ),
-                            width: 150,
-                            height: 50,
-                            child: const  Center(
-                              child: Text(
-                                'Cancel',
-                                style: TextStyle(
-                                    color: Colors.black26,
+                                color: Colors.lightBlue
+                              ),
+                              width: 150,
+                              height: 50,
+                              child: const  Center(
+                                child: Text(
+                                  'Save',
+                                  style: TextStyle(
+                                    color: Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        )
-                      ],
-                    )
-                  ],
+                          GestureDetector(
+                            onTap: () {
+                              controller.backToHomePage();
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(24),
+                                  color: Colors.grey
+                              ),
+                              width: 150,
+                              height: 50,
+                              child: const  Center(
+                                child: Text(
+                                  'Cancel',
+                                  style: TextStyle(
+                                      color: Colors.black26,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
                 ),
               )
             ],

@@ -34,7 +34,7 @@ class FirebaseService {
           DateTime expiryDate = parseExpiryDate(expiry);
           Expiry status = getExpirationStatus(expiryDate);
 
-          return ItemModel(className, productName, expiry, status, order);
+          return ItemModel(className, productName, expiry, status, order, null);
         }).toList();
       } else {
         return [];

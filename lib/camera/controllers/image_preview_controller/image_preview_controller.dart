@@ -1,14 +1,20 @@
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:la_tech/firebase_service/firebase_service.dart';
 import 'package:la_tech/home_page/controllers/home_page_controller/home_page_controller.dart';
+import 'package:la_tech/main.dart';
 import 'package:la_tech/model/item_model.dart';
 
 import '../../../env/app_navigator.dart';
 import '../../../model/expiry_enum.dart';
 import '../camera_controller/camera_controller.dart';
+
+import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:http/http.dart' as http;
 
 class ImagePreviewController extends SuperController {
   final FirebaseService firebaseService = FirebaseService();
@@ -27,6 +33,14 @@ class ImagePreviewController extends SuperController {
   Rxn<String> recognizedText = Rxn<String>();
   Rxn<XFile> image = Rxn<XFile>();
 
+  //Capture Item
+  late CameraController cameraController;
+  late List<CameraDescription> cameras;
+  Rxn<XFile> captureImage = Rxn<XFile>();
+  RxBool isCameraInitialized = false.obs;
+  Rx<bool> cameraStatus = false.obs;
+  Rx<int> cameraStatusValue = 0.obs;
+
   @override
   void onInit() async {
     super.onInit();
@@ -39,12 +53,18 @@ class ImagePreviewController extends SuperController {
     await captureAndRecognizeText();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future<void> captureAndRecognizeText() async {
     image.value = appCameraController.image.value;
     try {
       if (image.value != null) {
         final inputImage = InputImage.fromFilePath(image.value!.path);
-        final recognizedTextResult = await textRecognizer.processImage(inputImage);
+        final recognizedTextResult =
+            await textRecognizer.processImage(inputImage);
 
         debugPrint('olla ${recognizedTextResult.text}');
 
@@ -120,8 +140,9 @@ class ImagePreviewController extends SuperController {
     }
   }
 
-  void saveToDatabase() {
-    DateTime expiryDate = firebaseService.parseExpiryDate(expiryController.text);
+  void saveToDatabase() async {
+    DateTime expiryDate =
+        firebaseService.parseExpiryDate(expiryController.text);
 
     Expiry status = firebaseService.getExpirationStatus(expiryDate);
 
@@ -129,8 +150,16 @@ class ImagePreviewController extends SuperController {
       productNameController.text = 'null';
     }
 
-    final ItemModel itemModel = ItemModel(areaController.text, productNameController.text, expiryController.text, status, int.parse(orderController.text));
+    final ItemModel itemModel = ItemModel(
+        areaController.text,
+        productNameController.text,
+        expiryController.text,
+        status,
+        int.parse(orderController.text),
+        null);
     firebaseService.addItem(itemModel);
+
+    await uploadFile(captureImage.value!.path);
 
     N.toHomePage();
   }
@@ -138,6 +167,65 @@ class ImagePreviewController extends SuperController {
   void backToHomePage() {
     N.toHomePage();
   }
+
+  void toCaptureItem() async {
+    N.toCaptureItem();
+
+    await initializeCamera();
+  }
+
+  Future<void> initializeCamera() async {
+    try {
+      cameras = await availableCameras();
+      cameraController = CameraController(cameras[0], ResolutionPreset.high);
+      await cameraController.initialize();
+      isCameraInitialized.value = true;
+    } catch (e) {
+      isCameraInitialized.value = false;
+    }
+  }
+
+  Future<void> takeAPicture() async {
+    if (isCameraInitialized.value == false) {
+      return;
+    }
+    try {
+      captureImage.value = await cameraController.takePicture();
+      debugPrint('Image saved at path: ${captureImage.value?.path}');
+    } catch (e) {
+      debugPrint('Error taking picture: $e');
+    }
+    finally {
+      Get.back();
+    }
+  }
+
+  void onTapOpenFlash() async {
+    cameraStatus.value = !cameraStatus.value;
+    if (cameraStatus.value == true) {
+      await cameraController.setFlashMode(FlashMode.torch);
+    } else {
+      await cameraController.setFlashMode(FlashMode.off);
+    }
+  }
+
+  Future<void> uploadFile(String filePath) async {
+  final authClient = await authenticate();
+
+  final driveApi = drive.DriveApi(authClient);
+
+  final file = drive.File();
+  file.name = "example.jpg";
+
+  final fileContent = await http.ByteStream.fromBytes(await File(filePath).readAsBytes());
+
+  final uploadedFile = await driveApi.files.create(
+    file,
+    uploadMedia: drive.Media(fileContent, File(filePath).lengthSync()),
+  );
+
+  print("File uploaded. File ID: ${uploadedFile.id}");
+}
 
   @override
   void onDetached() {}
@@ -148,5 +236,9 @@ class ImagePreviewController extends SuperController {
   @override
   void onPaused() {}
   @override
-  void onResumed() {}
+  void onResumed() {
+    if (!isCameraInitialized.value) {
+      initializeCamera();
+    }
+  }
 }

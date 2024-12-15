@@ -55,7 +55,7 @@ class HomePageView extends GetView<HomePageController> {
                                     soldFunction: () {
                                       controller.showDeletePopup(
                                         context,
-                                        () => controller.deleteItem(item),
+                                        () => controller.deleteItem(item, null),
                                       );
                                     },
                                   ),
@@ -99,7 +99,7 @@ class HomePageView extends GetView<HomePageController> {
                                     soldFunction: () {
                                       controller.showDeletePopup(
                                         context,
-                                        () => controller.deleteItem(item),
+                                        () => controller.deleteItem(item, null),
                                       );
                                     },
                                   ),
@@ -144,7 +144,7 @@ class HomePageView extends GetView<HomePageController> {
                                     soldFunction: () {
                                       controller.showDeletePopup(
                                         context,
-                                        () => controller.deleteItem(item),
+                                        () => controller.deleteItem(item, null),
                                       );
                                     },
                                   ),
@@ -189,7 +189,7 @@ class ShoppingItem extends StatelessWidget {
   Widget build(BuildContext context) {
     if (expiry == '') {
       return Container(
-        height: 180,
+        height: 200,
         width: 120,
         decoration: BoxDecoration(
           color: Colors.white,
@@ -232,7 +232,7 @@ class ShoppingItem extends StatelessWidget {
     } else {
       return Container(
         padding: const EdgeInsets.all(10),
-        height: 180,
+        height: 200,
         width: 120,
         decoration: BoxDecoration(
           color: Colors.white,
@@ -297,6 +297,14 @@ class ShoppingItem extends StatelessWidget {
               'HSD $expiry',
               style: const TextStyle(
                 color: Colors.deepOrange,
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+            Text(
+              'Order: $order',
+              style: const TextStyle(
+                color: Colors.black,
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
               ),

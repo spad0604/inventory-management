@@ -23,4 +23,8 @@ class N {
   static void toImagePreview({RouteType type = RouteType.to}) {
     type.navigate(name: AppRoute.IMAGE_PREVIEW);
   }
+
+  static void toCaptureItem({RouteType type = RouteType.to}) {
+    type.navigate(name: AppRoute.CAPTURE_ITEM);
+  }
 }

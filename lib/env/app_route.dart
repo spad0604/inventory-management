@@ -2,6 +2,7 @@
 import 'package:get/get.dart';
 import 'package:la_tech/camera/controllers/image_preview_controller/image_preview_binding.dart';
 import 'package:la_tech/camera/view/camera_view/camera_view.dart';
+import 'package:la_tech/camera/view/capture_item/capture_item_screen.dart';
 import 'package:la_tech/camera/view/image_preview/image_preview_page.dart';
 import 'package:la_tech/home_page/views/home_page_views/home_page_view.dart';
 
@@ -14,6 +15,8 @@ class AppRoute {
   static String CAMERA_VIEW = '/camera_view';
 
   static String IMAGE_PREVIEW = '/image_preview';
+
+  static String CAPTURE_ITEM = '/capture_item';
 
   static List<GetPage> generateGetPages = [
     GetPage(
@@ -29,6 +32,10 @@ class AppRoute {
     GetPage(
         name: IMAGE_PREVIEW,
         page: ImagePreviewPage.new,
+        binding: ImagePreviewBinding()),
+    GetPage(
+        name: CAPTURE_ITEM,
+        page: CaptureItemScreen.new,
         binding: ImagePreviewBinding())
   ];
 
