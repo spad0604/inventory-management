@@ -272,11 +272,19 @@ class ShoppingItem extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Center(
-                child: Image.asset(
-              'assets/images/png/item.png',
-              width: 50,
-              height: 50,
-            )),
+                child: Image.network(
+                  'https://res.cloudinary.com/dhhdd4pkl/image/upload/${area}_$order',
+                  width: 80,
+                  height: 50,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      'assets/images/png/item.png',
+                      width: 50,
+                      height: 50,
+                    );
+                  },
+                )),
             const SizedBox(
               height: 5,
             ),

@@ -56,6 +56,7 @@ class ImagePreviewPage extends GetView<ImagePreviewController> {
                           const SizedBox(width: 10,),
                           GestureDetector(
                             onTap: () {
+                              controller.expiryController.text = '';
                               controller.readOnly.value = !controller.readOnly.value;
                             },
                             child: const Icon(

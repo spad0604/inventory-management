@@ -1,19 +1,19 @@
-import 'dart:io';
+import 'dart:core';
 
 import 'package:camera/camera.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:la_tech/firebase_service/firebase_service.dart';
 import 'package:la_tech/home_page/controllers/home_page_controller/home_page_controller.dart';
-import 'package:la_tech/main.dart';
 import 'package:la_tech/model/item_model.dart';
 
 import '../../../env/app_navigator.dart';
 import '../../../model/expiry_enum.dart';
 import '../camera_controller/camera_controller.dart';
-
-import 'package:googleapis/drive/v3.dart' as drive;
+import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class ImagePreviewController extends SuperController {
@@ -159,7 +159,13 @@ class ImagePreviewController extends SuperController {
         null);
     firebaseService.addItem(itemModel);
 
-    await uploadFile(captureImage.value!.path);
+    if (captureImage.value != null) {
+      final imageUrl =
+          await uploadImageToCloudinary(File(captureImage.value!.path));
+      debugPrint('Image URL: $imageUrl');
+    } else {
+      deleteImageFromCloudinary(areaController.text, int.parse(orderController.text));
+    }
 
     N.toHomePage();
   }
@@ -191,11 +197,9 @@ class ImagePreviewController extends SuperController {
     }
     try {
       captureImage.value = await cameraController.takePicture();
-      debugPrint('Image saved at path: ${captureImage.value?.path}');
     } catch (e) {
       debugPrint('Error taking picture: $e');
-    }
-    finally {
+    } finally {
       Get.back();
     }
   }
@@ -209,23 +213,84 @@ class ImagePreviewController extends SuperController {
     }
   }
 
-  Future<void> uploadFile(String filePath) async {
-  final authClient = await authenticate();
+  Future<String?> uploadImageToCloudinary(File imageFile) async {
+    const String cloudName = "dhhdd4pkl";
+    const String uploadPreset = "Inventor";
 
-  final driveApi = drive.DriveApi(authClient);
+    const String uploadUrl =
+        "https://api.cloudinary.com/v1_1/$cloudName/image/upload";
 
-  final file = drive.File();
-  file.name = "example.jpg";
+    try {
+      // Tên file đơn giản: area_order (VD: A_1, B_2, C_3)
+      String fileName = '${areaController.text}_${orderController.text}';
 
-  final fileContent = await http.ByteStream.fromBytes(await File(filePath).readAsBytes());
+      var request = http.MultipartRequest('POST', Uri.parse(uploadUrl))
+        ..fields['upload_preset'] = uploadPreset
+        ..fields['public_id'] = fileName
+        ..files.add(await http.MultipartFile.fromPath('file', imageFile.path));
 
-  final uploadedFile = await driveApi.files.create(
-    file,
-    uploadMedia: drive.Media(fileContent, File(filePath).lengthSync()),
-  );
+      var response = await request.send();
+      var responseData = await response.stream.bytesToString();
 
-  print("File uploaded. File ID: ${uploadedFile.id}");
-}
+      if (response.statusCode == 200) {
+        var jsonResponse = json.decode(responseData);
+        return jsonResponse['secure_url'];
+      } else {
+        print("Failed to upload image: ${response.statusCode}");
+        return null;
+      }
+    } catch (e) {
+      print("Error uploading image: $e");
+      return null;
+    }
+  }
+
+  Future<bool> deleteImageFromCloudinary(String area, int order) async {
+    const String cloudName = "dhhdd4pkl";
+    const String uploadPreset = "Inventor";
+    const String apiKey = "919668245813367"; // Cần API Key để xóa
+    const String apiSecret = "UEkNEm7d4cUChmbtxYAOXequn3A"; // Cần API Secret để xóa
+
+    final String publicId = '${area}_${order}'; // Tên file cần xóa
+    final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    // Tạo signature để xác thực
+    final String signature = generateSignature(publicId, timestamp, apiSecret);
+
+    const String deleteUrl =
+        "https://api.cloudinary.com/v1_1/$cloudName/image/destroy";
+
+    try {
+      final response = await http.post(
+        Uri.parse(deleteUrl),
+        body: {
+          'public_id': publicId,
+          'api_key': apiKey,
+          'timestamp': timestamp.toString(),
+          'signature': signature,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print("Image deleted successfully");
+        return true;
+      } else {
+        print("Failed to delete image: ${response.statusCode}");
+        print("Response: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("Error deleting image: $e");
+      return false;
+    }
+  }
+  String generateSignature(String publicId, int timestamp, String apiSecret) {
+    final String strToSign =
+        'public_id=$publicId&timestamp=$timestamp$apiSecret';
+    final bytes = utf8.encode(strToSign);
+    final digest = sha1.convert(bytes);
+    return digest.toString();
+  }
 
   @override
   void onDetached() {}
