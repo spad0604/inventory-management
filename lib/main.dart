@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:la_tech/home_page/controllers/home_page_controller/home_page_controller.dart';
 import 'package:la_tech/home_page/views/home_page_views/home_page_view.dart';
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
       initialRoute: AppRoute.HOME_PAGE,
       getPages: AppRoute.generateGetPages,
       home: const HomePageView(),
+      builder: EasyLoading.init(),
     );
   }
 }

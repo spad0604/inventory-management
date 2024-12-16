@@ -15,8 +15,8 @@ class FirebaseService {
     });
   }
 
-  void deleteItem(ItemModel item) {
-    _database.child('/${item.productName}_${item.className}_${item.order}').remove();
+  Future<void> deleteItem(ItemModel item) async {
+    await _database.child('/${item.productName}_${item.className}_${item.order}').remove();
   }
 
   Stream<List<ItemModel>> getAllItemsStream() {

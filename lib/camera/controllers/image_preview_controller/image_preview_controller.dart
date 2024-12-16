@@ -3,6 +3,7 @@ import 'dart:core';
 import 'package:camera/camera.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:la_tech/firebase_service/firebase_service.dart';
@@ -141,6 +142,7 @@ class ImagePreviewController extends SuperController {
   }
 
   void saveToDatabase() async {
+    EasyLoading.show(status: 'Loading...');
     DateTime expiryDate =
         firebaseService.parseExpiryDate(expiryController.text);
 
@@ -166,6 +168,7 @@ class ImagePreviewController extends SuperController {
     } else {
       deleteImageFromCloudinary(areaController.text, int.parse(orderController.text));
     }
+    EasyLoading.dismiss();
 
     N.toHomePage();
   }

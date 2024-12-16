@@ -1,4 +1,8 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:la_tech/env/app_navigator.dart';
 import 'package:la_tech/firebase_service/firebase_service.dart';
@@ -7,6 +11,7 @@ import 'package:la_tech/model/item_model.dart';
 
 import '../../../camera/view/widget/delete_popup.dart';
 import '../../../model/expiry_enum.dart';
+import 'package:http/http.dart' as http;
 
 class HomePageController extends SuperController {
   final FirebaseService firebaseService = FirebaseService();
@@ -26,6 +31,9 @@ class HomePageController extends SuperController {
   RxList<ItemModel> nearExpiryClassB = <ItemModel>[].obs;
   RxList<ItemModel> nearExpiryClassC = <ItemModel>[].obs;
 
+  // Add flag to track if popup has been shown
+  bool _hasShownPopup = false;
+
   @override
   void onInit() async {
     await loadData();
@@ -36,6 +44,7 @@ class HomePageController extends SuperController {
     tickClassA.fillRange(0, 11, 0);
     tickClassB.fillRange(0, 11, 0);
     tickClassC.fillRange(0, 11, 0);
+    EasyLoading.show(status: 'Loading...');
 
     firebaseService.getAllItemsStream().listen((items) {
       listItemClassA.clear();
@@ -55,7 +64,14 @@ class HomePageController extends SuperController {
       classAService();
       classBService();
       classCService();
+      
+      // Only show popup once when app starts
+      if (!_hasShownPopup) {
+        showNearExpiryPopup();
+        _hasShownPopup = true;
+      }
     });
+    EasyLoading.dismiss();
   }
 
   void classAService() {
@@ -115,20 +131,7 @@ class HomePageController extends SuperController {
     );
   }
 
-  void deleteItem(ItemModel itemModel, bool? isPopup) async {
-    if (isPopup == null) {
-      firebaseService.deleteItem(itemModel);
-      loadData();
-      Get.back();
-    } else {
-      firebaseService.deleteItem(itemModel);
-      loadData();
-      Get.back();
-      Get.back();
-    }
-  }
-
-  void classCService() {
+    void classCService() {
     nearExpiryClassC.clear();
     for (ItemModel itemModel in listItemClassC) {
       tickClassC[itemModel.order]++;
@@ -148,8 +151,73 @@ class HomePageController extends SuperController {
     }
 
     listItemClassC.sort((a, b) => a.order.compareTo(b.order));
+  }
 
-    showNearExpiryPopup();
+  Future<void> deleteItem(ItemModel itemModel, bool? isPopup) async {
+    try {
+      EasyLoading.show(status: 'Loading...'); 
+      if (isPopup == null) {
+        await firebaseService.deleteItem(itemModel);
+        await deleteImageFromCloudinary(itemModel.className, itemModel.order);
+        await loadData();
+        Get.back();
+      } else {
+        await firebaseService.deleteItem(itemModel);
+        await deleteImageFromCloudinary(itemModel.className, itemModel.order);
+        await loadData();
+        Get.back();
+      }
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+  Future<bool> deleteImageFromCloudinary(String area, int order) async {
+    const String cloudName = "dhhdd4pkl";
+    const String uploadPreset = "Inventor";
+    const String apiKey = "919668245813367"; // Cần API Key để xóa
+    const String apiSecret = "UEkNEm7d4cUChmbtxYAOXequn3A"; // Cần API Secret để xóa
+
+    final String publicId = '${area}_${order}'; // Tên file cần xóa
+    final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    // Tạo signature để xác thực
+    final String signature = generateSignature(publicId, timestamp, apiSecret);
+
+    const String deleteUrl =
+        "https://api.cloudinary.com/v1_1/$cloudName/image/destroy";
+
+    try {
+      final response = await http.post(
+        Uri.parse(deleteUrl),
+        body: {
+          'public_id': publicId,
+          'api_key': apiKey,
+          'timestamp': timestamp.toString(),
+          'signature': signature,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print("Image deleted successfully");
+        return true;
+      } else {
+        print("Failed to delete image: ${response.statusCode}");
+        print("Response: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("Error deleting image: $e");
+      return false;
+    }
+  }
+
+  String generateSignature(String publicId, int timestamp, String apiSecret) {
+    final String strToSign =
+        'public_id=$publicId&timestamp=$timestamp$apiSecret';
+    final bytes = utf8.encode(strToSign);
+    final digest = sha1.convert(bytes);
+    return digest.toString();
   }
 
   void showNearExpiryPopup() {

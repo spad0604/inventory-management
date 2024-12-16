@@ -12,153 +12,159 @@ class HomePageView extends GetView<HomePageController> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const AppBarWidget(pageName: 'Home Page'),
-              Container(
-                color: const Color(0xFFF8F6F7),
-                padding: const EdgeInsets.all(15),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      const Text(
-                        'Area A',
-                        style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Obx(
-                          () => Row(
-                            children: List.generate(
-                              controller.listItemClassA.length,
-                              (index) {
-                                var item = controller.listItemClassA[index];
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8.0),
-                                  child: ShoppingItem(
-                                    area: item.className,
-                                    order: item.order,
-                                    name: item.productName,
-                                    status: item.status,
-                                    expiry: item.expiry,
-                                    scanFunction: controller.toCameraView,
-                                    soldFunction: () {
-                                      controller.showDeletePopup(
-                                        context,
-                                        () => controller.deleteItem(item, null),
-                                      );
-                                    },
-                                  ),
-                                );
-                              },
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await controller.loadData();
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                const AppBarWidget(pageName: 'Home Page'),
+                Container(
+                  color: const Color(0xFFF8F6F7),
+                  padding: const EdgeInsets.all(15),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        const Text(
+                          'Area A',
+                          style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Obx(
+                            () => Row(
+                              children: List.generate(
+                                controller.listItemClassA.length,
+                                (index) {
+                                  var item = controller.listItemClassA[index];
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(horizontal: 8.0),
+                                    child: ShoppingItem(
+                                      area: item.className,
+                                      order: item.order,
+                                      name: item.productName,
+                                      status: item.status,
+                                      expiry: item.expiry,
+                                      scanFunction: controller.toCameraView,
+                                      soldFunction: () {
+                                        controller.showDeletePopup(
+                                          context,
+                                          () => controller.deleteItem(item, null),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      const Text(
-                        'Area B',
-                        style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Obx(
-                          () => Row(
-                            children: List.generate(
-                              controller.listItemClassB.length,
-                              (index) {
-                                var item = controller.listItemClassB[index];
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8.0),
-                                  child: ShoppingItem(
-                                    area: item.className,
-                                    order: item.order,
-                                    name: item.productName,
-                                    status: item.status,
-                                    expiry: item.expiry,
-                                    scanFunction: controller.toCameraView,
-                                    soldFunction: () {
-                                      controller.showDeletePopup(
-                                        context,
-                                        () => controller.deleteItem(item, null),
-                                      );
-                                    },
-                                  ),
-                                );
-                              },
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        const Text(
+                          'Area B',
+                          style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Obx(
+                            () => Row(
+                              children: List.generate(
+                                controller.listItemClassB.length,
+                                (index) {
+                                  var item = controller.listItemClassB[index];
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(horizontal: 8.0),
+                                    child: ShoppingItem(
+                                      area: item.className,
+                                      order: item.order,
+                                      name: item.productName,
+                                      status: item.status,
+                                      expiry: item.expiry,
+                                      scanFunction: controller.toCameraView,
+                                      soldFunction: () {
+                                        controller.showDeletePopup(
+                                          context,
+                                          () => controller.deleteItem(item, null),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      const Text(
-                        'Area C',
-                        style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Obx(
-                          () => Row(
-                            children: List.generate(
-                              controller.listItemClassC.length,
-                              (index) {
-                                var item = controller.listItemClassC[index];
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8.0),
-                                  child: ShoppingItem(
-                                    area: item.className,
-                                    order: item.order,
-                                    name: item.productName,
-                                    status: item.status,
-                                    expiry: item.expiry,
-                                    scanFunction: (area, order) =>
-                                        controller.toCameraView(area, order),
-                                    soldFunction: () {
-                                      controller.showDeletePopup(
-                                        context,
-                                        () => controller.deleteItem(item, null),
-                                      );
-                                    },
-                                  ),
-                                );
-                              },
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        const Text(
+                          'Area C',
+                          style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Obx(
+                            () => Row(
+                              children: List.generate(
+                                controller.listItemClassC.length,
+                                (index) {
+                                  var item = controller.listItemClassC[index];
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(horizontal: 8.0),
+                                    child: ShoppingItem(
+                                      area: item.className,
+                                      order: item.order,
+                                      name: item.productName,
+                                      status: item.status,
+                                      expiry: item.expiry,
+                                      scanFunction: (area, order) =>
+                                          controller.toCameraView(area, order),
+                                      soldFunction: () {
+                                        controller.showDeletePopup(
+                                          context,
+                                          () => controller.deleteItem(item, null),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

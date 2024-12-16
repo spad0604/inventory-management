@@ -48,6 +48,7 @@ dependencies:
   cloudinary_flutter: ^1.2.0
   cloudinary_url_gen: ^1.5.0
   crypto: ^3.0.6
+  flutter_easyloading: ^3.0.5
 
 dev_dependencies:
   flutter_test:
