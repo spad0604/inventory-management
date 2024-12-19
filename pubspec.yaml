@@ -51,6 +51,9 @@ dependencies:
   flutter_easyloading: ^3.0.5
   flutter_launcher_icons: ^0.14.2
   firebase_messaging: ^15.1.6
+  flutter_local_notifications: ^18.0.1
+  workmanager: ^0.5.2
+  shared_preferences: ^2.3.4
 
 dev_dependencies:
   flutter_test:
