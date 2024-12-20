@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -8,18 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:intl/intl.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:workmanager/workmanager.dart';
 
 import 'env/app_route.dart';
 import 'home_page/controllers/home_page_controller/home_page_controller.dart';
 import 'home_page/views/home_page_views/home_page_view.dart';
 
+const String taskCheckExpiry = "checkExpiryTask";
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await requestNotificationPermission();
   await Firebase.initializeApp(
     options: const FirebaseOptions(
       apiKey: 'AIzaSyBxuEflztZGUb7VAGyXbxGAX-NWbAjo1kQ',
@@ -32,117 +30,98 @@ void main() async {
     ),
   );
 
-  await initializeService();
+  // Khởi tạo WorkManager
+  Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
+
+  // Đăng ký tác vụ lặp lại
+  Workmanager().registerPeriodicTask(
+    "1",
+    taskCheckExpiry,
+    frequency: const Duration(minutes: 15), // Thay đổi tùy yêu cầu
+  );
 
   Get.lazyPut(() => HomePageController());
   runApp(const MyApp());
 }
 
-Future<void> initializeService() async {
-  final service = FlutterBackgroundService();
-
-  await service.configure(
-      iosConfiguration:
-          IosConfiguration(onForeground: onStart, autoStart: true),
-      androidConfiguration: AndroidConfiguration(
-          onStart: onStart, isForegroundMode: true, autoStart: true));
-
-  await service.startService();
-}
-
-void onStart(ServiceInstance service) async {
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: 'AIzaSyBxuEflztZGUb7VAGyXbxGAX-NWbAjo1kQ',
-      appId: '1:43603538044:android:8abc3962a9b845059c59f9',
-      messagingSenderId: '43603538044',
-      projectId: 'inventory-management-e4022',
-      storageBucket: 'inventory-management-e4022.appspot.com',
-      databaseURL:
-          'https://inventory-management-e4022-default-rtdb.firebaseio.com',
-    ),
-  );
-
-  final databaseRef = FirebaseDatabase.instance.ref();
-  final FlutterLocalNotificationsPlugin notificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-
-  // Initialize notifications here once
-  const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-
-  const InitializationSettings initializationSettings =
-      InitializationSettings(android: initializationSettingsAndroid);
-
-  notificationsPlugin.initialize(
-    initializationSettings,
-    onDidReceiveNotificationResponse: (NotificationResponse response) async {
-      if (response.payload != null) {
-        // Handle notification response if necessary
-      }
-    },
-  );
-
-  Timer.periodic(Duration(minutes: 15), (timer) async {
-    String notification = "";
-    List<String> notifications = []; // List to store multiple notifications
-
-    final snapshot = await databaseRef.child('/').get();
-    if (snapshot.exists) {
-      final data = snapshot.value as Map<dynamic, dynamic>;
-      final now = DateTime.now();
-      data.forEach((key, value) {
-        final expiryString = value['expiry'] as String?;
-        if (expiryString != null) {
-          final expiryDate = DateFormat("dd/MM/yyyy").parse(expiryString);
-          final difference = expiryDate.difference(now).inDays;
-
-          if (difference < 0) {
-            notifications.add(
-                'Sản phẩm "${value['productName']}" ở kệ "${value['className']}" thứ tự "${value['order']}" đã hết hạn vào ngày ${expiryString}.\n');
-          } else if (difference < 30) {
-            notifications.add(
-                'Sản phẩm "${value['productName']}" ở kệ "${value['className']}" thứ tự "${value['order']}" sắp hết hạn vào ngày ${expiryString}.\n');
-          }
-        }
-      });
-    }
-
-    // Nếu có thông báo, hiển thị một thông báo tổng hợp
-    for(int i = 0; i < notifications.length; i++) {
-      notification += notifications[i];
-    }
-    if (notifications.isNotEmpty) {
-  print(notifications);
-  notificationsPlugin.show(
-    0,
-    'Product Expiry Alert',
-    notification, // Hiển thị thông báo tổng hợp
-    NotificationDetails(
-      android: AndroidNotificationDetails(
-        vibrationPattern: Int64List.fromList([0, 5000, 1000, 2000, 1000, 2000]),
-        'expiry_channel',
-        'Expiry Alerts',
-        importance: Importance.max,
-        priority: Priority.high,
-        playSound: true,
-        styleInformation: BigTextStyleInformation(
-          notification, // Set the big text style
-          contentTitle: 'Product Expiry Alert',
-          summaryText: 'Multiple products are expiring soon or have expired',
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    if (task == taskCheckExpiry) {
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+          apiKey: 'AIzaSyBxuEflztZGUb7VAGyXbxGAX-NWbAjo1kQ',
+          appId: '1:43603538044:android:8abc3962a9b845059c59f9',
+          messagingSenderId: '43603538044',
+          projectId: 'inventory-management-e4022',
+          storageBucket: 'inventory-management-e4022.appspot.com',
+          databaseURL:
+              'https://inventory-management-e4022-default-rtdb.firebaseio.com',
         ),
-      ),
-    ),
-  );
-}
+      );
 
-service.on('stopService').listen((event) {
-  service.stopSelf();
-});
-  });
+      final databaseRef = FirebaseDatabase.instance.ref();
+      final FlutterLocalNotificationsPlugin notificationsPlugin =
+          FlutterLocalNotificationsPlugin();
 
-  service.on('stopService').listen((event) {
-    service.stopSelf();
+      // Initialize notifications
+      const AndroidInitializationSettings initializationSettingsAndroid =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
+      const InitializationSettings initializationSettings =
+          InitializationSettings(android: initializationSettingsAndroid);
+      notificationsPlugin.initialize(initializationSettings);
+
+      // Check product expiry logic
+      String notification = "";
+      List<String> notifications = [];
+
+      final snapshot = await databaseRef.child('/').get();
+      if (snapshot.exists) {
+        final data = snapshot.value as Map<dynamic, dynamic>;
+        final now = DateTime.now();
+        data.forEach((key, value) {
+          final expiryString = value['expiry'] as String?;
+          if (expiryString != null) {
+            final expiryDate = DateFormat("dd/MM/yyyy").parse(expiryString);
+            final difference = expiryDate.difference(now).inDays;
+
+            if (difference < 0) {
+              notifications.add(
+                  'Sản phẩm "${value['productName']}" ở kệ "${value['className']}" thứ tự "${value['order']}" đã hết hạn vào ngày ${expiryString}.\n');
+            } else if (difference < 30) {
+              notifications.add(
+                  'Sản phẩm "${value['productName']}" ở kệ "${value['className']}" thứ tự "${value['order']}" sắp hết hạn vào ngày ${expiryString}.\n');
+            }
+          }
+        });
+      }
+
+      if (notifications.isNotEmpty) {
+        notification = notifications.join('\n');
+        notificationsPlugin.show(
+          0,
+          'Product Expiry Alert',
+          notification,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              vibrationPattern:
+                  Int64List.fromList([0, 5000, 1000, 2000, 1000, 2000]),
+              'expiry_channel',
+              'Expiry Alerts',
+              importance: Importance.max,
+              priority: Priority.high,
+              playSound: true,
+              styleInformation: BigTextStyleInformation(
+                notification,
+                contentTitle: 'Product Expiry Alert',
+                summaryText:
+                    'Multiple products are expiring soon or have expired',
+              ),
+            ),
+          ),
+        );
+      }
+    }
+    return Future.value(true);
   });
 }
 
@@ -164,11 +143,5 @@ class _MyAppState extends State<MyApp> {
       home: const HomePageView(),
       builder: EasyLoading.init(),
     );
-  }
-}
-
-Future<void> requestNotificationPermission() async {
-  if (await Permission.notification.isDenied) {
-    Permission.notification.request();
   }
 }

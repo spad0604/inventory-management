@@ -54,6 +54,8 @@ dependencies:
   flutter_local_notifications: ^18.0.1
   shared_preferences: ^2.3.4
   flutter_background_service: ^5.0.10
+  worker_manager: ^7.2.2
+  workmanager: ^0.5.2
 
 dev_dependencies:
   flutter_test:
