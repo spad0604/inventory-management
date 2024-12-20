@@ -34,6 +34,8 @@ class ImagePreviewController extends SuperController {
   Rxn<String> recognizedText = Rxn<String>();
   Rxn<XFile> image = Rxn<XFile>();
 
+  RxBool isActiveButton = false.obs;
+
   //Capture Item
   late CameraController cameraController;
   late List<CameraDescription> cameras;
@@ -48,6 +50,7 @@ class ImagePreviewController extends SuperController {
     areaController.text = homePageController.areaValue.value!;
     orderController.text = homePageController.orderValue.value.toString();
 
+    expiryController.addListener(checkActiveButton);
     image.value = null;
     expiryController.clear();
     recognizedText.value = null;
@@ -57,6 +60,15 @@ class ImagePreviewController extends SuperController {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void checkActiveButton() {
+    if (expiryController.text == 'Không tìm thấy hạn sử dụng' ||
+        !RegExp(r'^\d{2}/\d{2}/\d{4}$').hasMatch(expiryController.text)) {
+      isActiveButton.value = false;
+    } else {
+      isActiveButton.value = true;
+    }
   }
 
   Future<void> captureAndRecognizeText() async {
@@ -166,10 +178,10 @@ class ImagePreviewController extends SuperController {
           await uploadImageToCloudinary(File(captureImage.value!.path));
       debugPrint('Image URL: $imageUrl');
     } else {
-      deleteImageFromCloudinary(areaController.text, int.parse(orderController.text));
+      deleteImageFromCloudinary(
+          areaController.text, int.parse(orderController.text));
     }
     EasyLoading.dismiss();
-
     N.toHomePage();
   }
 
@@ -252,7 +264,8 @@ class ImagePreviewController extends SuperController {
     const String cloudName = "dhhdd4pkl";
     const String uploadPreset = "Inventor";
     const String apiKey = "919668245813367"; // Cần API Key để xóa
-    const String apiSecret = "UEkNEm7d4cUChmbtxYAOXequn3A"; // Cần API Secret để xóa
+    const String apiSecret =
+        "UEkNEm7d4cUChmbtxYAOXequn3A"; // Cần API Secret để xóa
 
     final String publicId = '${area}_${order}'; // Tên file cần xóa
     final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
@@ -287,6 +300,7 @@ class ImagePreviewController extends SuperController {
       return false;
     }
   }
+
   String generateSignature(String publicId, int timestamp, String apiSecret) {
     final String strToSign =
         'public_id=$publicId&timestamp=$timestamp$apiSecret';

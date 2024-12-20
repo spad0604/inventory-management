@@ -44,7 +44,6 @@ class HomePageController extends SuperController {
     tickClassA.fillRange(0, 11, 0);
     tickClassB.fillRange(0, 11, 0);
     tickClassC.fillRange(0, 11, 0);
-    EasyLoading.show(status: 'Loading...');
 
     firebaseService.getAllItemsStream().listen((items) {
       listItemClassA.clear();
@@ -71,7 +70,6 @@ class HomePageController extends SuperController {
         _hasShownPopup = true;
       }
     });
-    EasyLoading.dismiss();
   }
 
   void classAService() {

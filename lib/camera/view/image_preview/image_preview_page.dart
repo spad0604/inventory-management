@@ -32,32 +32,36 @@ class ImagePreviewPage extends GetView<ImagePreviewController> {
                       Obx(() {
                         if (controller.image.value != null) {
                           return SizedBox(
-                            child: Image.file(File(controller.image.value!.path)),
+                            child:
+                                Image.file(File(controller.image.value!.path)),
                           );
                         } else {
                           return const Text("No image captured");
                         }
                       }),
-                      const SizedBox(height: 40,),
+                      const SizedBox(
+                        height: 40,
+                      ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Expanded(
-                            child: Obx(
-                              () => CustomLargeTextField(
-                                  readOnly: controller.readOnly.value,
-                                  textFieldName: 'HSD',
-                                  hintText: 'HSD',
-                                  isConstrain: true,
-                                  textEditingController: controller.expiryController
-                                  )
-                            ),
+                            child: Obx(() => CustomLargeTextField(
+                                readOnly: controller.readOnly.value,
+                                textFieldName: 'HSD',
+                                hintText: 'HSD',
+                                isConstrain: true,
+                                textEditingController:
+                                    controller.expiryController)),
                           ),
-                          const SizedBox(width: 10,),
+                          const SizedBox(
+                            width: 10,
+                          ),
                           GestureDetector(
                             onTap: () {
                               controller.expiryController.text = '';
-                              controller.readOnly.value = !controller.readOnly.value;
+                              controller.readOnly.value =
+                                  !controller.readOnly.value;
                             },
                             child: const Icon(
                               Icons.edit,
@@ -75,8 +79,7 @@ class ImagePreviewPage extends GetView<ImagePreviewController> {
                           textFieldName: 'Area Name',
                           hintText: 'Area Name',
                           isConstrain: true,
-                          textEditingController: controller.areaController
-                      ),
+                          textEditingController: controller.areaController),
                       const SizedBox(
                         height: 20,
                       ),
@@ -85,17 +88,20 @@ class ImagePreviewPage extends GetView<ImagePreviewController> {
                           textFieldName: 'Order',
                           hintText: 'Order',
                           isConstrain: true,
-                          textEditingController: controller.orderController
+                          textEditingController: controller.orderController),
+                      const SizedBox(
+                        height: 20,
                       ),
-                      const SizedBox(height: 20,),
                       CustomLargeTextField(
                           readOnly: false,
                           textFieldName: 'Product Name',
                           hintText: 'Enter Product Name',
                           isConstrain: true,
-                          textEditingController: controller.productNameController
+                          textEditingController:
+                              controller.productNameController),
+                      const SizedBox(
+                        height: 20,
                       ),
-                      const SizedBox(height: 20,),
                       Center(
                         child: GestureDetector(
                           onTap: () {
@@ -113,63 +119,73 @@ class ImagePreviewPage extends GetView<ImagePreviewController> {
                             ),
                             child: Obx(
                               () => Center(
-                                child: controller.captureImage.value == null ? (
-                                  const Icon(
-                                    Icons.image,
-                                    size: 50,
-                                    color: Colors.black54,
-                                  )
-                                ) : Image.file(File(controller.captureImage.value!.path))
-                              ),
+                                  child: controller.captureImage.value == null
+                                      ? (const Icon(
+                                          Icons.image,
+                                          size: 50,
+                                          color: Colors.black54,
+                                        ))
+                                      : Image.file(File(controller
+                                          .captureImage.value!.path))),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20,),
+                      const SizedBox(
+                        height: 20,
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          GestureDetector(
-                            onTap: () {
-                              controller.saveToDatabase();
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(24),
-                                color: Colors.lightBlue
-                              ),
-                              width: 150,
-                              height: 50,
-                              child: const  Center(
-                                child: Text(
-                                  'Save',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                controller.isActiveButton.value == true
+                                    ? controller.saveToDatabase()
+                                    : null;
+                              },
+                              child: Obx(
+                                () => Container(
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(24),
+                                      color: controller.isActiveButton.value ==
+                                              true
+                                          ? Colors.lightBlue
+                                          : Colors.black54),
+                                  height: 50,
+                                  child: const Center(
+                                    child: Text(
+                                      'Save',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () {
-                              controller.backToHomePage();
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(24),
-                                  color: Colors.grey
-                              ),
-                              width: 150,
-                              height: 50,
-                              child: const  Center(
-                                child: Text(
-                                  'Cancel',
-                                  style: TextStyle(
-                                      color: Colors.black26,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                controller.backToHomePage();
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(24),
+                                    color: Colors.grey),
+                                height: 50,
+                                child: const Center(
+                                  child: Text(
+                                    'Cancel',
+                                    style: TextStyle(
+                                        color: Colors.black26,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600),
                                   ),
                                 ),
                               ),
