@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:la_tech/env/app_navigator.dart';
+import 'package:la_tech/firebase_service/authencation_service.dart';
 import 'package:la_tech/firebase_service/firebase_service.dart';
 import 'package:la_tech/home_page/views/home_page_views/home_page_view.dart';
 import 'package:la_tech/model/item_model.dart';
@@ -14,6 +15,7 @@ import '../../../model/expiry_enum.dart';
 import 'package:http/http.dart' as http;
 
 class HomePageController extends SuperController {
+  final AuthenticationService authenticationService = Get.find();
   final FirebaseService firebaseService = FirebaseService();
 
   List<int> tickClassA = List.filled(11, 0);
@@ -40,6 +42,81 @@ class HomePageController extends SuperController {
     super.onInit();
   }
 
+  Future<void> onPressLogout() async {
+    await authenticationService.signOut();
+    N.toLoginPage();
+  }
+
+  void showLogoutDialog() {
+    Get.dialog(Dialog(
+      child: Container(
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24), color: Colors.white),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'LOGOUT',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 15,),
+            const Text(
+              'Are you sure you want to logout?',
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 15,),
+            Row(
+              children: [
+                Expanded(
+                    child: GestureDetector(
+                      onTap: Get.back,
+                      child: Container(
+                        height: 40,
+                                        decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        color: Colors.black54),
+                                        child: const Center(
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold),
+                      ),
+                                        ),
+                                      ),
+                    )),
+                const SizedBox(width: 10,),
+                Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        await onPressLogout();
+                      },
+                      child: Container(
+                        height: 40,
+                                        decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        color: Colors.lightBlue),
+                                        child: const Center(
+                      child: Text(
+                        'Agree',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold),
+                      ),
+                                        ),
+                                      ),
+                    )),
+              ],
+            )
+          ],
+        ),
+      ),
+    ));
+  }
+
   Future<void> loadData() async {
     tickClassA.fillRange(0, 11, 0);
     tickClassB.fillRange(0, 11, 0);
@@ -63,7 +140,7 @@ class HomePageController extends SuperController {
       classAService();
       classBService();
       classCService();
-      
+
       // Only show popup once when app starts
       if (!_hasShownPopup) {
         showNearExpiryPopup();
@@ -85,7 +162,8 @@ class HomePageController extends SuperController {
 
     for (int i = 1; i <= 10; i++) {
       if (tickClassA[i] == 0) {
-        ItemModel itemModel = ItemModel('A', '', '', Expiry.valid, i, null);
+        ItemModel itemModel =
+            ItemModel('_A_', 'A', '', '', Expiry.valid, i, null);
         listItemClassA.add(itemModel);
       }
     }
@@ -106,7 +184,8 @@ class HomePageController extends SuperController {
 
     for (int i = 1; i <= 10; i++) {
       if (tickClassB[i] == 0) {
-        ItemModel itemModel = ItemModel('B', '', '', Expiry.valid, i, null);
+        ItemModel itemModel =
+            ItemModel('_B_', 'B', '', '', Expiry.valid, i, null);
         listItemClassB.add(itemModel);
       }
     }
@@ -129,7 +208,7 @@ class HomePageController extends SuperController {
     );
   }
 
-    void classCService() {
+  void classCService() {
     nearExpiryClassC.clear();
     for (ItemModel itemModel in listItemClassC) {
       tickClassC[itemModel.order]++;
@@ -143,7 +222,8 @@ class HomePageController extends SuperController {
 
     for (int i = 1; i <= 10; i++) {
       if (tickClassC[i] == 0) {
-        ItemModel itemModel = ItemModel('C', '', '', Expiry.valid, i, null);
+        ItemModel itemModel =
+            ItemModel('_C_', 'C', '', '', Expiry.valid, i, null);
         listItemClassC.add(itemModel);
       }
     }
@@ -153,7 +233,7 @@ class HomePageController extends SuperController {
 
   Future<void> deleteItem(ItemModel itemModel, bool? isPopup) async {
     try {
-      EasyLoading.show(status: 'Loading...'); 
+      EasyLoading.show(status: 'Loading...');
       if (isPopup == null) {
         await firebaseService.deleteItem(itemModel);
         await deleteImageFromCloudinary(itemModel.className, itemModel.order);
@@ -174,7 +254,8 @@ class HomePageController extends SuperController {
     const String cloudName = "dhhdd4pkl";
     const String uploadPreset = "Inventor";
     const String apiKey = "919668245813367"; // Cần API Key để xóa
-    const String apiSecret = "UEkNEm7d4cUChmbtxYAOXequn3A"; // Cần API Secret để xóa
+    const String apiSecret =
+        "UEkNEm7d4cUChmbtxYAOXequn3A"; // Cần API Secret để xóa
 
     final String publicId = '${area}_${order}'; // Tên file cần xóa
     final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
@@ -268,8 +349,8 @@ class HomePageController extends SuperController {
                             soldFunction: () {
                               showDeletePopup(
                                   context,
-                                  () =>
-                                      deleteItem(nearExpiryClassA[index], true));
+                                  () => deleteItem(
+                                      nearExpiryClassA[index], true));
                             },
                           );
                         }),
@@ -300,8 +381,8 @@ class HomePageController extends SuperController {
                             soldFunction: () {
                               showDeletePopup(
                                   context,
-                                  () =>
-                                      deleteItem(nearExpiryClassB[index], true));
+                                  () => deleteItem(
+                                      nearExpiryClassB[index], true));
                             },
                           );
                         }),
@@ -332,8 +413,8 @@ class HomePageController extends SuperController {
                             soldFunction: () {
                               showDeletePopup(
                                   context,
-                                  () =>
-                                      deleteItem(nearExpiryClassC[index], true));
+                                  () => deleteItem(
+                                      nearExpiryClassC[index], true));
                             },
                           );
                         }),

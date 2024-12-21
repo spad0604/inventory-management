@@ -165,6 +165,7 @@ class ImagePreviewController extends SuperController {
     }
 
     final ItemModel itemModel = ItemModel(
+        '${productNameController.text}_${areaController.text}_${orderController.text}',
         areaController.text,
         productNameController.text,
         expiryController.text,

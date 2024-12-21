@@ -7,6 +7,8 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:la_tech/login_page/login_page_controller/login_page_controller.dart';
+import 'package:la_tech/login_page/login_page_view/login_page_screen.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'env/app_route.dart';
@@ -35,12 +37,12 @@ void main() async {
 
   // Đăng ký tác vụ lặp lại
   Workmanager().registerPeriodicTask(
-    "1",
+    taskCheckExpiry,
     taskCheckExpiry,
     frequency: const Duration(minutes: 15), // Thay đổi tùy yêu cầu
   );
 
-  Get.lazyPut(() => HomePageController());
+  Get.lazyPut(() => LoginPageController());
   runApp(const MyApp());
 }
 
@@ -74,7 +76,7 @@ void callbackDispatcher() {
       String notification = "";
       List<String> notifications = [];
 
-      final snapshot = await databaseRef.child('/').get();
+      final snapshot = await databaseRef.child('/data').get();
       if (snapshot.exists) {
         final data = snapshot.value as Map<dynamic, dynamic>;
         final now = DateTime.now();
@@ -138,9 +140,9 @@ class _MyAppState extends State<MyApp> {
     return GetMaterialApp(
       theme: ThemeData(fontFamily: 'Poppins'),
       debugShowCheckedModeBanner: false,
-      initialRoute: AppRoute.HOME_PAGE,
+      initialRoute: AppRoute.LOGIN_PAGE,
       getPages: AppRoute.generateGetPages,
-      home: const HomePageView(),
+      home: LoginPageScreen(),
       builder: EasyLoading.init(),
     );
   }

@@ -20,7 +20,10 @@ class HomePageView extends GetView<HomePageController> {
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
-                const AppBarWidget(pageName: 'Home Page'),
+                AppBarWidget(
+                  pageName: 'Home Page',
+                  arrowBack: controller.showLogoutDialog,
+                ),
                 Container(
                   color: const Color(0xFFF8F6F7),
                   padding: const EdgeInsets.all(15),
@@ -48,8 +51,8 @@ class HomePageView extends GetView<HomePageController> {
                                 (index) {
                                   var item = controller.listItemClassA[index];
                                   return Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(horizontal: 8.0),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
                                     child: ShoppingItem(
                                       area: item.className,
                                       order: item.order,
@@ -60,7 +63,8 @@ class HomePageView extends GetView<HomePageController> {
                                       soldFunction: () {
                                         controller.showDeletePopup(
                                           context,
-                                          () => controller.deleteItem(item, null),
+                                          () =>
+                                              controller.deleteItem(item, null),
                                         );
                                       },
                                     ),
@@ -92,8 +96,8 @@ class HomePageView extends GetView<HomePageController> {
                                 (index) {
                                   var item = controller.listItemClassB[index];
                                   return Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(horizontal: 8.0),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
                                     child: ShoppingItem(
                                       area: item.className,
                                       order: item.order,
@@ -104,7 +108,8 @@ class HomePageView extends GetView<HomePageController> {
                                       soldFunction: () {
                                         controller.showDeletePopup(
                                           context,
-                                          () => controller.deleteItem(item, null),
+                                          () =>
+                                              controller.deleteItem(item, null),
                                         );
                                       },
                                     ),
@@ -136,8 +141,8 @@ class HomePageView extends GetView<HomePageController> {
                                 (index) {
                                   var item = controller.listItemClassC[index];
                                   return Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(horizontal: 8.0),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
                                     child: ShoppingItem(
                                       area: item.className,
                                       order: item.order,
@@ -149,7 +154,8 @@ class HomePageView extends GetView<HomePageController> {
                                       soldFunction: () {
                                         controller.showDeletePopup(
                                           context,
-                                          () => controller.deleteItem(item, null),
+                                          () =>
+                                              controller.deleteItem(item, null),
                                         );
                                       },
                                     ),
@@ -279,18 +285,18 @@ class ShoppingItem extends StatelessWidget {
             const SizedBox(height: 20),
             Center(
                 child: Image.network(
-                  'https://res.cloudinary.com/dhhdd4pkl/image/upload/${area}_$order',
-                  width: 80,
+              'https://res.cloudinary.com/dhhdd4pkl/image/upload/${area}_$order',
+              width: 80,
+              height: 50,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Image.asset(
+                  'assets/images/png/item.png',
+                  width: 50,
                   height: 50,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      'assets/images/png/item.png',
-                      width: 50,
-                      height: 50,
-                    );
-                  },
-                )),
+                );
+              },
+            )),
             const SizedBox(
               height: 5,
             ),

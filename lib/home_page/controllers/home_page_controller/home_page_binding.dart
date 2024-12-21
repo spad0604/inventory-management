@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:la_tech/camera/controllers/camera_controller/camera_controller.dart';
+import 'package:la_tech/firebase_service/authencation_service.dart';
 import 'package:la_tech/home_page/controllers/home_page_controller/home_page_controller.dart';
 
 class HomePageBinding extends Bindings {
@@ -8,5 +9,7 @@ class HomePageBinding extends Bindings {
     Get.lazyPut(HomePageController.new);
 
     Get.put(AppCameraController.new);
+
+    Get.lazyPut(() => AuthenticationService());
   }
 }

@@ -7,7 +7,8 @@ class FirebaseService {
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
 
   void addItem(ItemModel item) {
-    _database.child('/${item.productName}_${item.className}_${item.order}').set({
+    _database.child('/data').push().set({
+      'key': '${item.productName}_${item.className}_${item.order}',
       'productName': item.productName,
       'className': item.className,
       'order': item.order,
@@ -16,28 +17,77 @@ class FirebaseService {
   }
 
   Future<void> deleteItem(ItemModel item) async {
-    await _database.child('/${item.productName}_${item.className}_${item.order}').remove();
+    final snapshot = await _database.child('/data').get();
+    if (snapshot.exists) {
+      final data = snapshot.value as List<dynamic>;
+      final updatedData = data.where((element) {
+        if (element == null) return false; // Filter out null values
+        final map = element as Map<dynamic, dynamic>;
+        return !(map['key'] ==
+            '${item.productName}_${item.className}_${item.order}');
+      }).toList();
+      await _database.child('/data').set(updatedData);
+    }
   }
 
   Stream<List<ItemModel>> getAllItemsStream() {
-    return _database.child('/').onValue.map((event) {
-      final data = event.snapshot.value as Map<dynamic, dynamic>?;
+    return _database.child('/data').onValue.map((event) {
+      final rawData = event.snapshot.value;
 
-      if (data != null) {
-        return data.entries.map((entry) {
+      if (rawData is Map<dynamic, dynamic>) {
+        // Xử lý khi dữ liệu là Map
+        return rawData.entries.map((entry) {
           final value = entry.value as Map<dynamic, dynamic>;
-          final String className = value['className'];
-          final String productName = value['productName'];
-          final String expiry = value['expiry'];
-          final int order = value['order'];
+
+          final String key = value['key'] ?? '';
+          final String className = value['className'] ?? '';
+          final String productName = value['productName'] ?? '';
+          final String expiry = value['expiry'] ?? '';
+          final int order = value['order'] ?? 0;
 
           DateTime expiryDate = parseExpiryDate(expiry);
           Expiry status = getExpirationStatus(expiryDate);
 
-          return ItemModel(className, productName, expiry, status, order, null);
+          return ItemModel(
+            key,
+            className,
+            productName,
+            expiry,
+            status,
+            order,
+            null,
+          );
         }).toList();
+      } else if (rawData is List<dynamic>) {
+        // Xử lý khi dữ liệu là List
+        return rawData
+            .map((item) {
+              if (item is Map<dynamic, dynamic>) {
+                final String key = item['key'] ?? '';
+                final String className = item['className'] ?? '';
+                final String productName = item['productName'] ?? '';
+                final String expiry = item['expiry'] ?? '';
+                final int order = item['order'] ?? 0;
+
+                DateTime expiryDate = parseExpiryDate(expiry);
+                Expiry status = getExpirationStatus(expiryDate);
+
+                return ItemModel(
+                  key,
+                  className,
+                  productName,
+                  expiry,
+                  status,
+                  order,
+                  null,
+                );
+              }
+              return null; // Nếu item không phải là Map, bỏ qua
+            })
+            .whereType<ItemModel>()
+            .toList(); // Lọc bỏ giá trị null
       } else {
-        return [];
+        return []; // Trường hợp dữ liệu không hợp lệ
       }
     });
   }

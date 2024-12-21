@@ -27,4 +27,8 @@ class N {
   static void toCaptureItem({RouteType type = RouteType.to}) {
     type.navigate(name: AppRoute.CAPTURE_ITEM);
   }
+
+  static void toLoginPage({RouteType type = RouteType.offAll}) {
+    type.navigate(name: AppRoute.LOGIN_PAGE);
+  }
 }
